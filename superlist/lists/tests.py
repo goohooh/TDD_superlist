@@ -15,5 +15,23 @@ class HomePageTest(TestCase):
     def test_home_page_returns_correct_html(self):
         request = HttpRequest()
         response = home_page(request)
-        expected_html = render_to_string('home.html')
+        expected_html = render_to_string('home.html', request=request)
+
+        self.assertEqual(response.content.decode(), expected_html)
+
+    def test_home_page_cas_save_a_POST_request(self):
+        request = HttpRequest()
+        request.method = 'POST'
+        request.POST['item_text'] = '신규 작업 아이템'
+
+        response = home_page(request)
+
+        self.assertIn('신규 작업 아이템', response.content.decode())
+
+        expected_html = render_to_string(
+            'home.html',
+            { 'new_item_text': '신규 작업 아이템' },
+            request=request
+        )
+
         self.assertEqual(response.content.decode(), expected_html)
