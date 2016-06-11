@@ -1,9 +1,10 @@
+from django.test import LiveServerTestCase
+
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-import unittest
 
 
-class NewVisitorTest(unittest.TestCase):
+class NewVisitorTest(LiveServerTestCase):
  
     def setUp(self):
         self.browser = webdriver.Firefox()
@@ -60,6 +61,3 @@ class NewVisitorTest(unittest.TestCase):
         self.fail('Finish the test!')
 
         # 만족하고 잠자리에 든다
-        
-if __name__ == '__main__':
-    unittest.main()
