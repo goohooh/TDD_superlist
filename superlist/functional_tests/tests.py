@@ -1,5 +1,6 @@
 from django.test import LiveServerTestCase
 
+import os
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
@@ -7,7 +8,10 @@ from selenium.webdriver.common.keys import Keys
 class NewVisitorTest(LiveServerTestCase):
  
     def setUp(self):
-        self.browser = webdriver.Firefox()
+        chromedriver = '/Users/seongpil/Applications/chromedriver'
+        os.environ["webdriver.chrome.driver"] = chromedriver
+
+        self.browser = webdriver.Chrome(chromedriver)
         self.browser.implicitly_wait(3)
 
     def tearDown(self):
