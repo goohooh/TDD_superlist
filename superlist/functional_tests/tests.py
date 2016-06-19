@@ -5,10 +5,11 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
 
+chromedriver = '/Users/seongpil/Applications/chromedriver'
+
 class NewVisitorTest(LiveServerTestCase):
  
     def setUp(self):
-        chromedriver = '/Users/seongpil/Applications/chromedriver'
         os.environ["webdriver.chrome.driver"] = chromedriver
 
         self.browser = webdriver.Chrome(chromedriver)
@@ -66,7 +67,7 @@ class NewVisitorTest(LiveServerTestCase):
         ## 새로운 브라우저 세션을 이용해서 에디스의 정보가
         ## 쿠키를 통해 유입되는 것을 방지한다
         self.browser.quit()
-        self.browser = webdriver.Firefox()
+        self.browser = webdriver.Chrome(chromedriver)
 
         # 프란시스가 홈페이지에 접속한다
         # 에디스의 리스트는 보이지 않는다
@@ -93,3 +94,25 @@ class NewVisitorTest(LiveServerTestCase):
         self.fail('Finish the test!')
 
         # 둘 다 만족하고 잠자리에 든다
+
+    def test_layout_and_styling(self):
+        # 에디스는 메인 페이지를 방문한다
+        self.browser.get(self.live_server_url)
+        self.browser.set_window_size(1024,768)
+
+        # 그녀는 입력 상자가 가운데 배치된 것을 본다
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        self.assertAlmostEqual(
+            inputbox.location['x'] + inputbox.size['width']/2,
+            512,
+            delta=10
+        )
+
+        # 그녀는 새로운 리스트를 시작하고 입력 상자가 가운데 배치된 것을 확인한다
+        inputbox.send_keys('testing\n')
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        self.assertAlmostEqual(
+            inputbox.location['x'] + inputbox.size['width']/2,
+            512,
+            delta=10
+        )
