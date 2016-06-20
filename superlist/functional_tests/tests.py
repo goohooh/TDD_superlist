@@ -1,4 +1,4 @@
-from django.test import LiveServerTestCase
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 import os
 from selenium import webdriver
@@ -7,7 +7,7 @@ from selenium.webdriver.common.keys import Keys
 
 chromedriver = '/Users/seongpil/Applications/chromedriver'
 
-class NewVisitorTest(LiveServerTestCase):
+class NewVisitorTest(StaticLiveServerTestCase):
  
     def setUp(self):
         os.environ["webdriver.chrome.driver"] = chromedriver
