@@ -26,7 +26,9 @@ def new_list(request):
     item = Item.objects.create(text=request.POST.get('item_text'), list=list_)
     try:
         item.full_clean()
+        item.save()
     except ValidationError:
+        list_.delete()
         error = "You can't have an empty list item"
         return render(request, 'home.html', {"error": error})
     return redirect('/lists/{list_id}/'.format(list_id=list_.id,))
