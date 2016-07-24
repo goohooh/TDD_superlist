@@ -6,20 +6,38 @@ from django.utils.html import escape
 
 from lists.views import home_page
 from lists.models import Item, List
+from lists.forms import ItemForm
 
 
 class HomePageTest(TestCase):
+    maxDiff = None
 
-    def test_root_url_resolves_to_home_page_view(self):
-        found = resolve('/')
-        self.assertEqual(found.func, home_page)
+#    def test_root_url_resolves_to_home_page_view(self):
+#        found = resolve('/')
+#        self.assertEqual(found.func, home_page)
+#
+#    def test_home_page_returns_correct_html(self):
+#        request = HttpRequest()
+#        response = home_page(request)
+#        expected_html = render_to_string(
+#            'home.html', 
+#            # request=request,
+#            {'form': ItemForm()}
+#        )
+#
+#        self.assertEqual(response.content.decode(), expected_html)
+#        # 긴 문자열 비교할 때 유용. diff 형태의 결과를 보여주지만,
+#        # 너무 긴 경우 뒷부분을 자르도록 maxDiff = None 설정
+#        self.assertMultiLineEqual(response.content.decode(), expected_html)
 
     def test_home_page_returns_correct_html(self):
-        request = HttpRequest()
-        response = home_page(request)
-        expected_html = render_to_string('home.html', request=request)
+        response = self.client.get('/')
+        self.assertTemplateUsed(response, 'home.html')
 
-        self.assertEqual(response.content.decode(), expected_html)
+    def test_home_page_uses_itemform(self):
+        response = self.client.get('/')
+        self.assertIsInstance(response.context['form'], ItemForm)
+
 
 
 class ListViewTest(TestCase):
@@ -55,7 +73,7 @@ class ListViewTest(TestCase):
     def test_saving_a_POST_request(self):
         self.client.post(
             '/lists/new',
-            data={'item_text': '신규 작업 아이템'}
+            data={'text': '신규 작업 아이템'}
         )
 
         # 모델 연동 테스트
@@ -67,7 +85,7 @@ class ListViewTest(TestCase):
         response = self.client.post(
             '/lists/new',
             data={
-                'item_text': '신규 작업 아이템',     
+                'text': '신규 작업 아이템',     
             }
         )
 
@@ -82,7 +100,7 @@ class ListViewTest(TestCase):
 
         self.client.post(
             '/lists/{id}/'.format(id=correct_list.id),
-            data={'item_text': '신규 작업 아이템 in existing list'}
+            data={'text': '신규 작업 아이템 in existing list'}
         )
 
         # 모델 연동 테스트
@@ -98,14 +116,14 @@ class ListViewTest(TestCase):
         response = self.client.post(
             '/lists/{id}/'.format(id=correct_list.id),
             data={
-                'item_text': '신규 작업 아이템 in existing list',     
+                'text': '신규 작업 아이템 in existing list',     
             }
         )
 
         self.assertRedirects(response, '/lists/{id}/'.format(id=correct_list.id))
 
     def test_validation_errors_are_sent_back_to_home_page_template(self):
-        response = self.client.post('/lists/new', data={'item_text': ''})
+        response = self.client.post('/lists/new', data={'text': ''})
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'home.html')
         expected_error = escape("You can't have an empty list item")
@@ -113,7 +131,7 @@ class ListViewTest(TestCase):
         self.assertContains(response, expected_error)
 
     def test_invalid_list_items_arent_saved(self):
-        self.client.post('/lists/new', data={'item_text': ''})
+        self.client.post('/lists/new', data={'text': ''})
         self.assertEqual(List.objects.count(), 0)
         self.assertEqual(Item.objects.count(), 0)
 
@@ -121,7 +139,7 @@ class ListViewTest(TestCase):
         list_ = List.objects.create()
         response = self.client.post(
             '/lists/{list_id}/'.format(list_id=list_.id),
-            data={'item_text': ''}
+            data={'text': ''}
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'list.html')
